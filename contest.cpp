@@ -20,8 +20,8 @@ int main(){
 	while(t--) {
 		int x, n;
 		cin >> x >> n;
-		if(n & 1) cout << x << endl;
-		else cout << 0 << endl;
+		
+		cout << x << " " << n << endl;
 	}
 
     return 0;
