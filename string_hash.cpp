@@ -64,6 +64,21 @@ pair<int,int> get_hash(int i, int j){ // O(1)
     return hs;
 }
 
+bool is_period(const string &s, int len){
+    int n = s.size();
+    auto base = get_hash(0, len-1);
+    int fullBlocks = n / len, rem = n % len;
+
+    for(int i=1; i<fullBlocks; i++){
+        if(get_hash(i*len, i*len+len-1) != base) return false;
+    }
+
+    if(rem > 0){
+        if(get_hash(fullBlocks*len, n-1) != get_hash(0, rem-1)) return false;
+    }
+    return true;
+}
+
 int main(){
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -77,8 +92,8 @@ int main(){
 
     vector<int> borders;
     int n = s.size();
-    for(int i=1; i<n; ++i){
-        if(get_hash(0, i-1) == get_hash(n-i, n-1)){
+    for(int i=1; i<=n; ++i){
+        if(is_period(s, i)){
             borders.push_back(i);
         }
     }
