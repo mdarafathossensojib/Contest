@@ -12,15 +12,22 @@ const int MAX = 6005;
 const ll invrs = 499122177;
 const int N = 1e5+2;
 
+string get_sub_str(const string &s, int l, int r){
+    return s.substr(l, r-l+1);
+}
 
 int main(){
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int t; cin >> t;
-	while(t--) {
-		int n;
-        cin >> n;
-	}
+    string a, b;
+    cin >> a >> b;
+
+    int n = a.size(), m = b.size(), ans = 0;
+    for(int i=0; i + m - 1 < n; ++i){
+        if(get_sub_str(a, i, i + m - 1) == b) ans++;
+    }
+    cout << ans << endl;
+
     return 0;
 }

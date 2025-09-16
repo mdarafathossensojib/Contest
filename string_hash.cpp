@@ -3,26 +3,65 @@ using namespace std;
 #define ll long long
 
 const int p1 = 131, mod1 = 127657753, p2 = 137, mod2 = 987654319;
-const int N = 1e5 + 5;
-int pw1[N], pw2[N];
+const int N = 1e6 + 5;
 
-void prec(){
-    pw1[0] = pw2[0] = 1;
+pair<int,int> pw[N], ipw[N];
+
+int power(ll x, ll n, int MOD){ // O(log n)
+    int ans = 1 % MOD;
+    while(n > 0){
+        if(n & 1) ans = 1LL*ans*x % MOD;
+        x = 1LL*x*x % MOD;
+        n >>= 1;
+    }
+    return ans;
+}
+
+void prec(){ // O(N)
+    pw[0] = {1, 1}, ipw[0] = {1, 1};
+    int ip1 = power(p1, mod1-2, mod1);
+    int ip2 = power(p2, mod2-2, mod2);
     for(int i=1; i<N; ++i){
-        pw1[i] = 1LL * pw1[i-1] * p1 % mod1;
-        pw2[i] = 1LL * pw2[i-1] * p2 % mod2;
+        pw[i].first = 1LL*pw[i-1].first*p1 % mod1;
+        pw[i].second = 1LL*pw[i-1].second*p2 % mod2;
+
+        ipw[i].first = 1LL*ipw[i-1].first*ip1 % mod1;
+        ipw[i].second = 1LL*ipw[i-1].second*ip2 % mod2;
     }
 }
 
-pair<int,int> get_hash(const string &s){
-    int h1 = 0, h2 = 0, n = s.size();
+pair<int,int> string_hash(string &s){
+    int n = s.size();
+    pair<int,int> hs({0, 0});
     for(int i=0; i<n; ++i){
-        h1 += 1LL * s[i] * pw1[i] % mod1;
-        h1 %= mod1;
-        h2 += 1LL * s[i] * pw2[i] % mod2;
-        h2 %= mod2;
+        hs.first = (hs.first%mod1 + 1LL*s[i]*pw[i].first % mod1) % mod1;
+        hs.second = (hs.second%mod2 + 1LL*s[i]*pw[i].second % mod2) % mod2; 
     }
-    return {h1, h2};
+    return hs;
+}
+
+pair<int,int> pref[N];
+void build(string &s){ // O(n)
+    int n = s.size();
+    for(int i=0; i<n; ++i){
+        pref[i].first = 1LL*s[i]*pw[i].first % mod1;
+        if(i) pref[i].first = (pref[i].first + pref[i-1].first) % mod1;
+
+        pref[i].second = 1LL*s[i]*pw[i].second % mod2;
+        if(i) pref[i].second = (pref[i].second + pref[i-1].second) % mod2;
+    }
+}
+pair<int,int> get_hash(int i, int j){ // O(1)
+    pair<int,int> hs({0,0});
+    hs.first = pref[j].first;
+    if(i) hs.first = (hs.first - pref[i-1].first + mod1) % mod1;
+    hs.first = 1LL*hs.first*ipw[i].first % mod1;
+
+    hs.second = pref[j].second;
+    if(i) hs.second = (hs.second - pref[i-1].second + mod2) % mod2;
+    hs.second = 1LL*hs.second*ipw[i].second % mod2;
+
+    return hs;
 }
 
 int main(){
@@ -31,13 +70,21 @@ int main(){
 
     prec();
 
-    string s1, s2;
-    cin >> s1 >> s2;
+    string s;
+    cin >> s;
 
-    if(get_hash(s1) == get_hash(s2)){
-        cout << "YES\n";
+    build(s);
+
+    vector<int> borders;
+    int n = s.size();
+    for(int i=1; i<n; ++i){
+        if(get_hash(0, i-1) == get_hash(n-i, n-1)){
+            borders.push_back(i);
+        }
     }
-    else cout << "NO\n";
     
+    for(int x : borders) cout << x << " ";
+    cout << endl;
+
     return 0;
 }
